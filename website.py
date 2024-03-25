@@ -1,6 +1,7 @@
 from drafter import *
 from dataclasses import dataclass
 
+
 @dataclass
 class State:
     pass
@@ -10,6 +11,7 @@ class State:
 def index(state: State) -> Page:
     return Page(state, ["Hello World!"])
 
+
 hide_debug_information()
 
-start_server(State("", False))
+start_server(State())
