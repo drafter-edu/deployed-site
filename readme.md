@@ -1,6 +1,10 @@
-# 1. Fork this Repository
+# 1. Create a Repository with this Repo
 
-1. Fork this repository to your GitHub account.
+1. Click the "Use this template" button at the top of this page.
+2. Click the "Create a new repository"
+3. Choose an appropriate name, and write a description of your site.
+4. The site must be public.
+5. Click "Create repository"
 
 # 1. Update Your website.py
 
@@ -12,7 +16,7 @@ You might want to make sure that you call `hide_debug_information`, if you want 
 from drafter import *
 # ...
 
-hid_debug_information()
+hide_debug_information()
 
 # ...
 start_server()
