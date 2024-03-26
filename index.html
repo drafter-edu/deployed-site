@@ -53,7 +53,16 @@
                     alert(e);
                 }
             }
-        </script>
-        <script src="website.js" type="text/javascript"></script>
+			
+			$(document).ready(function() {
+				$.ajax({
+					type: "GET",
+					url: "website.py",
+					success: function(contents) {
+						startWebserver(contents);
+					}
+				});
+			});
+		</script>
     </body>
 </html>
