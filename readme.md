@@ -10,13 +10,15 @@
 
 2. Replace the contents of `website.py` with your own website file.
 
-You might want to make sure that you call `hide_debug_information`, if you want your site to be deployed without debug information.
+You might want to make sure that you call `hide_debug_information` and other setup functions, if you want your site to be deployed without debug information.
 
 ```python
 from drafter import *
 # ...
 
 hide_debug_information()
+set_website_title("Your Website Title")
+set_website_framed(False)
 
 # ...
 start_server()
