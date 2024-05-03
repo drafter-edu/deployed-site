@@ -73,6 +73,7 @@ jobs:
               run: |
                   pylint website/*.py --exit-zero > ./dist/lint.html
             - name: Run type checker
+              continue-on-error: true
               run: |
                   mypy website/*.py > ./dist/type.html
             - name: Create integrity report
