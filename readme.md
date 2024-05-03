@@ -1,37 +1,24 @@
-# 1. Create a Repository with this Repo
+# Website Name
 
-1. Click the "Use this template" button at the top of this page.
-2. Click the "Create a new repository"
-3. Choose an appropriate name, and write a description of your site.
-4. The site must be public.
-5. Click "Create repository"
+Replace this text with your website name.
 
-# 1. Update Your website.py
+# Description
 
-2. Replace the contents of `website.py` with your own website file.
+Replace this with a description of what your website does.
 
-You might want to make sure that you call `hide_debug_information` and other setup functions, if you want your site to be deployed without debug information.
+# Author
 
-```python
-from drafter import *
-# ...
+* **Name**: Replace this with your name.
+* **Email**: Replace this with your @udel.edu email address.
 
-hide_debug_information()
-set_website_title("Your Website Title")
-set_website_framed(False)
+# Help Resources Used
 
-# ...
-start_server()
-```
+If you got significant help from a website besides the official Drafter documentation, include links along with explanations of how the site helped you. If someone helped you, this is also a nice place to mention them to thank them for their help.
 
-# 2. Deploy your website
+# Planning Documents
 
-You can deploy this website via GitHub Pages.
+Link to [Planning Document](Replace this text here in the parentheses with the full filename of your planning document, with the extension)
 
-3. Go to the repository settings.
-4. Scroll down to the GitHub Pages section.
-5. Select the source branch (usually `main` or `master`).
-6. Click on the save button.
-7. Wait for the deployment to finish.
+# Video URL
 
-You can now access your website at `https://<username>.github.io/<repository-name>`.
+<Replace this with the URL to your video. Make sure you keep the angle brackets around the URL.>
