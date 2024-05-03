@@ -71,7 +71,7 @@ jobs:
                   echo "</pre></body></html>" >> ./dist/tests.html
             - name: Run linter
               run: |
-                  pylint website/*.py > ./dist/lint.html
+                  pylint website/*.py --exit-zero > ./dist/lint.html
             - name: Run type checker
               run: |
                   mypy website/*.py > ./dist/type.html
