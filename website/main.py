@@ -1,3 +1,4 @@
+from bakery import assert_equal
 from drafter import *
 from dataclasses import dataclass
 
@@ -16,5 +17,7 @@ class State:
 @route
 def index(state: State) -> Page:
     return Page(state, ["Hello World!"])
+
+assert_equal(index(State()), Page(State(), ["Hello World!"]))
 
 start_server(State())
