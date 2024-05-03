@@ -72,12 +72,14 @@ jobs:
             - name: Run linter
               run: |
                   echo "<html><body><pre>" > ./dist/lint.html
-                  pylint website/*.py --exit-zero > ./dist/lint.html
+                  pylint website/*.py --exit-zero >> ./dist/lint.html
                   echo "</pre></body></html>" >> ./dist/lint.html
             - name: Run type checker
               continue-on-error: true
               run: |
-                  mypy website/*.py > ./dist/type.html
+                  echo "<html><body><pre>" > ./dist/type.html
+                  mypy website/*.py >> ./dist/type.html
+                  echo "</pre></body></html>" >> ./dist/lint.html
             - name: Create integrity report
               run: |
                   echo "<html><body><pre>" > ./dist/integrity.html
