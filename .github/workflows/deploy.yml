@@ -57,7 +57,7 @@ jobs:
                   cp tools/404.html dist/404.html
             - name: Install dependencies
               run: |
-                  python -m pip install coverage drafter bakery
+                  python -m pip install coverage drafter bakery pylint mypy
                   : # Install students' requirements.txt file if it is present
                   if [ -f website/requirements.txt ]; then
                       python -m pip install -r website/requirements.txt
@@ -69,6 +69,12 @@ jobs:
                   DRAFTER_SKIP=true coverage run website/main.py >> ./dist/tests.html
                   coverage html -d ./dist/coverage
                   echo "</pre></body></html>" >> ./dist/tests.html
+            - name: Run linter
+              run: |
+                  pylint website/*.py > ./dist/lint.html
+            - name: Run type checker
+              run: |
+                  mypy website/*.py > ./dist/type.html
             - name: Create integrity report
               run: |
                   echo "<html><body><pre>" > ./dist/integrity.html
