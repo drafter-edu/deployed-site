@@ -72,8 +72,8 @@ jobs:
             - name: Create integrity report
               run: |
                   echo "<html><body><pre>" > ./dist/integrity.html
-                  md5sum 404.html >> ./dist/integrity.html
-                  md5sum index.html >> ./dist/integrity.html
+                  md5sum tools/404.html >> ./dist/integrity.html
+                  md5sum tools/index.html >> ./dist/integrity.html
                   md5sum .github/workflows/deploy.yml >> ./dist/integrity.html
                   echo "</pre></body></html>" >> ./dist/integrity.html
             - name: Create GitHub redirect
