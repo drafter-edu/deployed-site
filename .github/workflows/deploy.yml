@@ -156,7 +156,7 @@ jobs:
                   
                   : # Find all additional files that should be included (images, data files, etc.)
                   ADDITIONAL_FILES=""
-                  for ext in png jpg jpeg gif svg csv json txt md; do
+                  for ext in png jpg jpeg gif svg csv json txt md py; do
                       for file in ./dist/*.$ext; do
                           if [ -f "$file" ]; then
                               ADDITIONAL_FILES="$ADDITIONAL_FILES --additional-files $file"
@@ -165,19 +165,11 @@ jobs:
                   done
                   
                   : # Find all HTML files that should be treated as external pages
+                  : # Include generated build files so the About page can link to them directly
                   EXTERNAL_PAGES=""
                   for file in ./dist/*.html; do
                       if [ -f "$file" ]; then
-                          basename_file=$(basename "$file")
-                          : # Skip special files we create during build
-                          if [[ "$basename_file" != "dashboard.html" ]] && [[ "$basename_file" != "quick.html" ]] && \
-                             [[ "$basename_file" != "installation.html" ]] && [[ "$basename_file" != "compile.html" ]] && \
-                             [[ "$basename_file" != "tests.html" ]] && [[ "$basename_file" != "lint.html" ]] && \
-                             [[ "$basename_file" != "type.html" ]] && [[ "$basename_file" != "integrity.html" ]] && \
-                             [[ "$basename_file" != "git.html" ]] && [[ "$basename_file" != "commits.html" ]] && \
-                             [[ "$basename_file" != "repo.html" ]]; then
-                              EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages $file"
-                          fi
+                          EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages $file"
                       fi
                   done
                   
