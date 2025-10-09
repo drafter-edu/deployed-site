@@ -166,21 +166,21 @@ jobs:
                   
                   : # Explicitly list all HTML files that should be treated as external pages
                   : # Include generated build files so the About page can link to them directly
-                  EXTERNAL_PAGES="--external-pages \"dashboard Dashboard\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"quick Quick\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"installation Installation\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"repo Repository\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"compile Compile\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"tests Tests\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"coverage Coverage\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"lint Lint\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"type Type\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"integrity Integrity\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"git Git\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"commits Commits\""
+                  EXTERNAL_PAGES=(--external-pages "dashboard Dashboard")
+                  EXTERNAL_PAGES+=(--external-pages "quick Quick")
+                  EXTERNAL_PAGES+=(--external-pages "installation Installation")
+                  EXTERNAL_PAGES+=(--external-pages "repo Repository")
+                  EXTERNAL_PAGES+=(--external-pages "compile Compile")
+                  EXTERNAL_PAGES+=(--external-pages "tests Tests")
+                  EXTERNAL_PAGES+=(--external-pages "coverage Coverage")
+                  EXTERNAL_PAGES+=(--external-pages "lint Lint")
+                  EXTERNAL_PAGES+=(--external-pages "type Type")
+                  EXTERNAL_PAGES+=(--external-pages "integrity Integrity")
+                  EXTERNAL_PAGES+=(--external-pages "git Git")
+                  EXTERNAL_PAGES+=(--external-pages "commits Commits")
                   
                   : # Create a JS file to hold all their code
-                  uv run drafter ./dist/$MAIN_FILE --output-directory ./dist/ --warn-missing-info --create-404 if_missing $ADDITIONAL_FILES $EXTERNAL_PAGES 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
+                  uv run drafter ./dist/$MAIN_FILE --output-directory ./dist/ --warn-missing-info --create-404 if_missing $ADDITIONAL_FILES "${EXTERNAL_PAGES[@]}" 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
 
                   echo "</pre></body></html>" >> ./dist/compile.html
                   echo "* [Compile Files](../compile.html): Compilation details from when we bundled up your website. You probably don't need to worry about this, unless there was an error during deployment." >> docs/dashboard.md
