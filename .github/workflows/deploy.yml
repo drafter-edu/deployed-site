@@ -155,32 +155,44 @@ jobs:
                   fi
                   
                   : # Find all additional files that should be included (images, data files, etc.)
-                  ADDITIONAL_FILES=""
-                  for ext in png jpg jpeg gif svg csv json txt md py; do
-                      for file in ./dist/*.$ext; do
-                          if [ -f "$file" ]; then
-                              ADDITIONAL_FILES="$ADDITIONAL_FILES --additional-files $file"
-                          fi
+                  ADDITIONAL_ARGS=()
+                  shopt -s nullglob
+                  for ext in png jpg jpeg gif svg webp csv json txt md py html js css doc docx pdf xls xlsx; do
+                      for file in ./dist/*."$ext"; do
+                          ADDITIONAL_ARGS+=( "--additional-files" "$file" )
                       done
                   done
                   
                   : # Explicitly list all HTML files that should be treated as external pages
                   : # Include generated build files so the About page can link to them directly
-                  EXTERNAL_PAGES="--external-pages \"dashboard Dashboard\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"quick Quick\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"installation Installation\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"repo Repository\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"compile Compile\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"tests Tests\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"coverage Coverage\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"lint Lint\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"type Type\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"integrity Integrity\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"git Git\""
-                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages \"commits Commits\""
+                  EXTERNAL_PAGES=(
+                      "--external-pages=quick Quick"
+                      "--external-pages=installation Installation"
+                      "--external-pages=repo Repository"
+                      "--external-pages=compile Compile"
+                      "--external-pages=tests Tests"
+                      "--external-pages=coverage Coverage"
+                      "--external-pages=lint Lint"
+                      "--external-pages=type Type"
+                      "--external-pages=integrity Integrity"
+                      "--external-pages=git Git"
+                      "--external-pages=commits Commits"
+                  )
+
+                  # Log the exact argv we will send to drafter
+                  {
+                      echo "About to run drafter with arguments:"
+                      printf '  %q' uv run drafter "./dist/$MAIN_FILE" \
+                        --output-directory ./dist/ \
+                        --warn-missing-info \
+                        --create-404 if_missing
+                      printf ' %q' "${ADDITIONAL_ARGS[@]:-}"
+                      printf ' %q' "${EXTERNAL_PAGES[@]:-}"
+                      echo
+                  } |& tee -a ./dist/_build_log.txt ./dist/compile.html
                   
                   : # Create a JS file to hold all their code
-                  uv run drafter ./dist/$MAIN_FILE --output-directory ./dist/ --warn-missing-info --create-404 if_missing $ADDITIONAL_FILES $EXTERNAL_PAGES 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
+                  uv run drafter ./dist/$MAIN_FILE --output-directory ./dist/ --warn-missing-info --create-404 if_missing "${ADDITIONAL_FILES[@]}" "${EXTERNAL_PAGES[@]}" 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
 
                   echo "</pre></body></html>" >> ./dist/compile.html
                   echo "* [Compile Files](../compile.html): Compilation details from when we bundled up your website. You probably don't need to worry about this, unless there was an error during deployment." >> docs/dashboard.md
