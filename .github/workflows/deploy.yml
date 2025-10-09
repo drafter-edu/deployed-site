@@ -113,16 +113,29 @@ jobs:
             # Sanity checks
             - name: Main File Exists
               id: structural_checks
-              # TODO: Make this accept a wider range of "main.py" filenames, and output the actual filename as a variable for later steps.
               run: |
-                  : # Make sure that there is a main.py file
-                  if [ ! -f main.py ]; then
-                      echo "Missing main.py file" |& tee -a ./dist/_build_log.txt |& tee "./dist/_ERRORS.txt"
+                  : # Find the main Python file - look for main.py, Main.py, app.py, or App.py
+                  MAIN_FILE=""
+                  for possible_main in main.py Main.py app.py App.py; do
+                      if [ -f "$possible_main" ]; then
+                          MAIN_FILE="$possible_main"
+                          break
+                      fi
+                  done
+                  
+                  : # Make sure that a main file was found
+                  if [ -z "$MAIN_FILE" ]; then
+                      echo "Missing main Python file (looked for main.py, Main.py, app.py, App.py)" |& tee -a ./dist/_build_log.txt |& tee "./dist/_ERRORS.txt"
                       exit 1
                   fi
+                  
+                  : # Output the main file as a variable for later steps
+                  echo "main_file=$MAIN_FILE" >> $GITHUB_OUTPUT
+                  echo "Found main file: $MAIN_FILE" |& tee -a ./dist/_build_log.txt
+                  
                   : # Make sure that they updated the main.py file with their version, based on the md5sum: c6cdb475fd65d116483482315dc9b8ef
-                  if [ "$(md5sum main.py | cut -d' ' -f1)" == "c6cdb475fd65d116483482315dc9b8ef" ]; then
-                      echo "Error during build! You need to update the main.py file with your own code" |& tee -a ./dist/_build_log.txt |& tee "./dist/_ERRORS.txt"
+                  if [ "$(md5sum "$MAIN_FILE" | cut -d' ' -f1)" == "c6cdb475fd65d116483482315dc9b8ef" ]; then
+                      echo "Error during build! You need to update the $MAIN_FILE file with your own code" |& tee -a ./dist/_build_log.txt |& tee "./dist/_ERRORS.txt"
                       exit 1
                   fi
 
@@ -134,10 +147,34 @@ jobs:
                   echo "<html><body><pre>" > ./dist/compile.html
                   : # Copy over all the students' files in the website directory
                   rsync -av --exclude='__pycache__' --exclude='.DS_Store' --exclude='./dist/' --exclude='.*' ./ ./dist/
-                  : # TODO: Need to get a list of all their output files and pass them into the --additional-files argument
-                  : # TODO: Need to handle get all the links we build, and pass them into the --external-pages argument
+                  
+                  : # Get the main file from the previous step
+                  MAIN_FILE="${{ steps.structural_checks.outputs.main_file }}"
+                  if [ -z "$MAIN_FILE" ]; then
+                      MAIN_FILE="main.py"
+                  fi
+                  
+                  : # Find all additional files that should be included (images, data files, etc.)
+                  ADDITIONAL_FILES=""
+                  for ext in png jpg jpeg gif svg csv json txt md py; do
+                      for file in ./dist/*.$ext; do
+                          if [ -f "$file" ]; then
+                              ADDITIONAL_FILES="$ADDITIONAL_FILES --additional-files $file"
+                          fi
+                      done
+                  done
+                  
+                  : # Find all HTML files that should be treated as external pages
+                  : # Include generated build files so the About page can link to them directly
+                  EXTERNAL_PAGES=""
+                  for file in ./dist/*.html; do
+                      if [ -f "$file" ]; then
+                          EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages $file"
+                      fi
+                  done
+                  
                   : # Create a JS file to hold all their code
-                  uv run drafter ./dist/main.py --output-directory ./dist/ --warn-missing-info --create-404 if_missing 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
+                  uv run drafter ./dist/$MAIN_FILE --output-directory ./dist/ --warn-missing-info --create-404 if_missing $ADDITIONAL_FILES $EXTERNAL_PAGES 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
 
                   echo "</pre></body></html>" >> ./dist/compile.html
                   echo "* [Compile Files](../compile.html): Compilation details from when we bundled up your website. You probably don't need to worry about this, unless there was an error during deployment." >> docs/dashboard.md
@@ -146,8 +183,14 @@ jobs:
             - name: Run tests and output code coverage
               id: tests
               run: |
+                  : # Get the main file from the previous step
+                  MAIN_FILE="${{ steps.structural_checks.outputs.main_file }}"
+                  if [ -z "$MAIN_FILE" ]; then
+                      MAIN_FILE="main.py"
+                  fi
+                  
                   echo "<html><body><pre>" > ./dist/tests.html
-                  DRAFTER_SKIP=true coverage run main.py 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/_build_log.txt ./dist/tests.html
+                  DRAFTER_SKIP=true coverage run "$MAIN_FILE" 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/_build_log.txt ./dist/tests.html
                   coverage html -d ./dist/coverage 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/_build_log.txt ./dist/tests.html
                   echo "</pre></body></html>" >> ./dist/tests.html
                   echo '* [Raw Test Output](../tests.html): The results of running your test cases, if any.' >> docs/dashboard.md
@@ -168,6 +211,12 @@ jobs:
               id: typecheck
               continue-on-error: true
               run: |
+                  : # Get the main file from the previous step
+                  MAIN_FILE="${{ steps.structural_checks.outputs.main_file }}"
+                  if [ -z "$MAIN_FILE" ]; then
+                      MAIN_FILE="main.py"
+                  fi
+                  
                   echo "<html><body><pre>" > ./dist/type.html
                   : # If there is no mypy.ini file, then create one with default settings to ignore Bakery
                   if [ ! -f mypy.ini ]; then
@@ -176,7 +225,7 @@ jobs:
                       echo 'ignore_missing_imports = True' >> mypy.ini
                   fi
                   : # Not yet comfortable with mypy, so running it in a continue-on-error mode and not failing the build
-                  mypy main.py |& tee -a ./dist/_build_log.txt ./dist/type.html
+                  mypy "$MAIN_FILE" |& tee -a ./dist/_build_log.txt ./dist/type.html
                   echo "</pre></body></html>" >> ./dist/type.html
                   echo '* [Type](../type.html): The results of running a *typechecker* (`MyPy`) on your code. This is a sophisticated piece of software that can identify type issues. However, you should take it with a grain of salt, since it may raise issues that are outside of the scope of this course. ' >> docs/dashboard.md
 
