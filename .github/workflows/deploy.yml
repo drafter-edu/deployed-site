@@ -164,14 +164,20 @@ jobs:
                       done
                   done
                   
-                  : # Find all HTML files that should be treated as external pages
+                  : # Explicitly list all HTML files that should be treated as external pages
                   : # Include generated build files so the About page can link to them directly
-                  EXTERNAL_PAGES=""
-                  for file in ./dist/*.html; do
-                      if [ -f "$file" ]; then
-                          EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages $file"
-                      fi
-                  done
+                  EXTERNAL_PAGES="--external-pages dashboard Dashboard"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages quick Quick"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages installation Installation"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages repo Repository"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages compile Compile"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages tests Tests"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages coverage Coverage"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages lint Lint"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages type Type"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages integrity Integrity"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages git Git"
+                  EXTERNAL_PAGES="$EXTERNAL_PAGES --external-pages commits Commits"
                   
                   : # Create a JS file to hold all their code
                   uv run drafter ./dist/$MAIN_FILE --output-directory ./dist/ --warn-missing-info --create-404 if_missing $ADDITIONAL_FILES $EXTERNAL_PAGES 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/compile.html ./dist/_build_log.txt
