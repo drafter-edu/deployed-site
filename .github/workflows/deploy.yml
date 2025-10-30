@@ -87,7 +87,7 @@ jobs:
               id: dependencies
               run: |
                   echo "<html><body><pre>" > ./dist/installation.html
-                  uv pip install coverage drafter bakery pylint mypy matplotlib pillow coverage 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/installation.html
+                  uv pip install coverage drafter bakery pylint mypy matplotlib pillow coverage analyze_drafter_site 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/installation.html
                   : # Install students' requirements.txt file if it is present
                   if [ -f requirements.txt ]; then
                       uv pip install -r requirements.txt 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/installation.html
@@ -177,6 +177,7 @@ jobs:
                       "--external-pages=integrity Integrity"
                       "--external-pages=git Git"
                       "--external-pages=commits Commits"
+                      "--external-pages=drafter_analysis Analysis"
                   )
 
                   # Log the exact argv we will send to drafter
@@ -248,6 +249,32 @@ jobs:
                   echo "<li><a href='./type.html'>Type</a>: The results of running a <em>typechecker</em> (<code>MyPy</code>) on your code. This is a sophisticated piece of software that can identify type issues. However, you should take it with a grain of salt, since it may raise issues that are outside of the scope of this course.</li>" >> ./dist/dashboard.html
 
                   printf 'Successfully ran type checker\n' >> ./dist/_build_log.txt
+            - name: Run Drafter Site Analysis
+              id: drafter_analysis
+              continue-on-error: true
+              run: |
+                  : # Get the main file from the previous step
+                  MAIN_FILE="${{ steps.structural_checks.outputs.main_file }}"
+                  if [ -z "$MAIN_FILE" ]; then
+                      MAIN_FILE="main.py"
+                  fi
+
+                  : # Ensure the analyzer is present (defensive)
+                  uv pip install analyze_drafter_site 2> >(tee ./dist/_ERRORS.txt) |& tee -a ./dist/_build_log.txt
+
+                  : # Run the analyzer, capture to .txt and .html
+                  echo "<html><body><pre>" > ./dist/drafter_analysis.html
+                  if uv run analyze_drafter_site "$MAIN_FILE" | tee -a ./dist/drafter_analysis.html ./dist/_build_log.txt ; then
+                      printf '\n' >> ./dist/drafter_analysis.html
+                  else
+                      echo "analyze_drafter_site exited with a non-zero status" |& tee -a ./dist/_WARNINGS.txt ./dist/_build_log.txt
+                  fi
+                  echo "</pre></body></html>" >> ./dist/drafter_analysis.html
+
+                  : # Dashboard links (HTML + raw text)
+                  echo "<li><a href='./drafter_analysis.html'>Drafter Analysis</a>: Output from <code>analyze_drafter_site</code> on your main file.</li>" >> ./dist/dashboard.html
+
+                  printf 'Successfully ran analyze_drafter_site\n' >> ./dist/_build_log.txt
             - name: Create integrity report
               if: ${{ !cancelled() }}
               id: integrity
