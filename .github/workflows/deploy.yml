@@ -297,7 +297,7 @@ jobs:
                   else
                     : # If the ./dist/_WARNINGS.txt file is not empty, then add warning section to the dashboard
                     if [ -s ./dist/_WARNINGS.txt ]; then
-                        printf '<h2 style="color: orange;">Warning During Build!</h2>\n<p style="color: orange;">There was one or more warnings during your build. Details are below:</p>\n<pre>' >> ./dist/_DASHBOARD_HEADER.html
+                        printf '<h2 style="color: orange;">Warning During Build!</h2>\n<p style="color: orange;">There were one or more warnings during your build. Details are below:</p>\n<pre>' >> ./dist/_DASHBOARD_HEADER.html
                         cat ./dist/_WARNINGS.txt >> ./dist/_DASHBOARD_HEADER.html
                         printf '</pre>\n' >> ./dist/_DASHBOARD_HEADER.html
                         printf 'Warnings found during build. They were prepended to dashboard.\n' >> ./dist/_build_log.txt
